@@ -10,7 +10,10 @@ import UnifiedLoader from "@/components/loading/LoadingScreen";
 import styles from "@/styles/app/admin/page.module.css";
 
 export default function AdminPage() {
-  const { data: session, status } = useSession();
+  // const { data: session, status } = useSession();
+  const sessionContext = useSession;
+  const session = sessionContext?.data;
+  const status = sessionContext?.status;
   const router = useRouter();
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
