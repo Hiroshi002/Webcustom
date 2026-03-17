@@ -1,0 +1,13 @@
+"use client";
+
+import { useEffect } from "react";
+import { SessionProvider } from "next-auth/react";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    const imageUrl = `https://picsum.photos/1920/1080?random=${Date.now()}`;
+    document.documentElement.style.setProperty("--random-bg-url", `url("${imageUrl}")`);
+  }, []);
+
+  return <SessionProvider>{children}</SessionProvider>;
+}
