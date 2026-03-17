@@ -1,0 +1,25 @@
+// app/api/ping/route.ts
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  return NextResponse.json({
+    status: 'pong',
+    timestamp: Date.now(),
+    region: 'STATION-01', // ชื่อสถานีสมมติให้ดูเท่
+    version: '1.0.4-STABLE'
+  }, {
+    status: 200,
+    headers: {
+      'Cache-Control': 'no-store, max-age=0', // ป้องกันการจำค่าเก่าเพื่อให้ Ping แม่นยำที่สุด
+    }
+  });
+}
+
+export async function HEAD() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Cache-Control': 'no-store, max-age=0',
+    },
+  });
+}
