@@ -1,0 +1,224 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: #ffffff;
+  background: #010103;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  min-height: 100dvh;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease forwards;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes logo {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade {
+  animation: fade 0.9s ease forwards;
+}
+
+.animate-logo {
+  animation: logo 1.2s ease forwards;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.logo-neon {
+  background: linear-gradient(90deg, #a855f7, #ffffff, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 35px rgba(168,85,247,0.8));
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100% { filter: drop-shadow(0 0 25px rgba(168,85,247,0.6)); }
+  50% { filter: drop-shadow(0 0 45px rgba(34,211,238,0.9)); }
+}
+
+.cyber-card {
+  position: relative;
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.02)
+  );
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.45s ease;
+}
+
+.cyber-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(168,85,247,0.25),
+    transparent
+  );
+  opacity: 0;
+  transition: 0.45s;
+}
+
+.cyber-card:hover {
+  transform: translateY(-14px);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.6),
+    0 0 60px rgba(168,85,247,0.35);
+}
+
+.cyber-card:hover::after {
+  opacity: 1;
+}
+
+.particle {
+  position: absolute;
+  top: -10px;
+  width: 2px;
+  height: 2px;
+  background: white;
+  opacity: 0.6;
+  animation: fall linear infinite;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110vh);
+    opacity: 0;
+  }
+}
+
+.noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+.boot-screen {
+  background: black;
+  color: #22ff88;
+  font-family: monospace;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.boot-text {
+  font-size: 1.2rem;
+  animation: blink 1s infinite;
+}
+
+.boot-sub {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+@keyframes blink {
+  50% { opacity: 0.4; }
+}
+
+.overkill {
+  position: relative;
+  min-height: 100vh;
+  background: #000;
+  color: white;
+  overflow: hidden;
+  font-family: "Orbitron", monospace;
+}
+
+.matrix {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(0,255,120,0.15) 0px,
+    rgba(0,255,120,0.15) 2px,
+    transparent 4px,
+    transparent 8px
+  );
+  animation: matrixMove 1.5s linear infinite;
+  opacity: 0.15;
+}
+
+::selection {
+  background-color: rgba(168, 85, 247, 0.5);
+  color: #ffffff;
+}

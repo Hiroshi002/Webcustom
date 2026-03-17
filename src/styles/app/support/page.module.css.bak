@@ -1,0 +1,564 @@
+.page {
+  @apply relative min-h-screen bg-[#130015] text-white overflow-hidden selection:bg-fuchsia-500/50;
+  font-family: var(--font-geist-sans);
+}
+
+.bg {
+  @apply fixed inset-0 z-0 pointer-events-none;
+}
+
+.bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--random-bg-url, url("/globe.svg"));
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.12;
+}
+
+.bgRadial {
+  @apply absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#3b0a4a_0%,#130015_80%)] opacity-70;
+}
+
+.bgGrid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(to right, #ffffff06 1px, transparent 1px),
+    linear-gradient(to bottom, #ffffff06 1px, transparent 1px),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 14px);
+  background-size: 64px 64px, 64px 64px, 120px 120px;
+  mask-image: radial-gradient(ellipse 80% 55% at 50% 45%, #000 65%, transparent 100%);
+}
+
+.bgShoji {
+  position: absolute;
+  inset: -10%;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 120px 120px;
+  opacity: 0.25;
+  mask-image: radial-gradient(ellipse 70% 40% at 50% 50%, #000 55%, transparent 100%);
+}
+
+.bgHalo {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  left: 8%;
+  top: 12%;
+  background: radial-gradient(circle, rgba(232,121,249,0.18), rgba(219,39,119,0.12), transparent 65%);
+  filter: blur(6px);
+  opacity: 0.8;
+  animation: haloFloat 8s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.bgSweep {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: 15%;
+  height: 220px;
+  background: linear-gradient(90deg, transparent, rgba(232,121,249,0.24), rgba(244,114,182,0.16), transparent);
+  filter: blur(24px);
+  opacity: 0.7;
+  will-change: transform, opacity;
+}
+
+.bgScanline {
+  @apply absolute inset-0 opacity-[0.08];
+  background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
+  animation: scanline 7s linear infinite;
+  mix-blend-mode: screen;
+}
+
+.topBar {
+  @apply fixed top-0 inset-x-0 z-50 px-6 md:px-10 py-4 flex items-center justify-between backdrop-blur-xl bg-black/30 border-b border-white/5;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+}
+
+.navLeft {
+  @apply flex items-center;
+}
+
+.backLink {
+  @apply flex items-center gap-3 text-white/70 hover:text-white transition-colors;
+}
+
+.backIcon {
+  @apply flex items-center justify-center w-9 h-9 border border-white/10 bg-white/5;
+}
+
+.backText {
+  @apply hidden md:block text-[10px] tracking-[0.45em] uppercase;
+  font-family: var(--font-geist-mono);
+}
+
+.navCenter {
+  @apply hidden md:block text-[10px] tracking-[0.6em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.navRight {
+  @apply flex items-center gap-3;
+}
+
+.searchWrap {
+  @apply relative w-44 sm:w-72;
+}
+
+.searchIcon {
+  @apply absolute left-3 top-1/2 -translate-y-1/2 text-purple-400;
+}
+
+.searchInput {
+  @apply w-full bg-white/5 border border-white/10 py-2.5 pl-9 pr-4 text-[10px] tracking-[0.35em] uppercase text-white placeholder:text-white/20 focus:border-purple-500 outline-none transition-all;
+  font-family: var(--font-geist-mono);
+}
+
+.searchGlow {
+  @apply absolute bottom-0 left-0 h-[1px] w-0 bg-purple-500/70 transition-all duration-500;
+}
+
+.searchWrap:focus-within .searchGlow {
+  width: 100%;
+}
+
+.liveBadge {
+  @apply hidden sm:flex items-center gap-2 border border-purple-500/20 bg-purple-500/10 px-3 py-2 text-[9px] tracking-[0.3em] uppercase text-purple-200/80;
+  font-family: var(--font-geist-mono);
+}
+
+.liveDot {
+  @apply w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e];
+}
+
+.liveKanji {
+  @apply border-l border-white/10 pl-2 text-red-200;
+}
+
+.container {
+  @apply relative z-10 max-w-6xl mx-auto px-6 md:px-10 pt-28 pb-32;
+}
+
+.hero {
+  @apply grid gap-10 lg:grid-cols-[1.2fr_0.8fr] items-center;
+}
+
+.heroLeft {
+  @apply space-y-6;
+}
+
+.heroKicker {
+  @apply text-[10px] tracking-[0.6em] uppercase text-purple-200/70;
+  font-family: var(--font-geist-mono);
+}
+
+.heroTitle {
+  @apply text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none uppercase;
+  font-family: var(--font-geist-sans);
+  animation: titleGlow 6s ease-in-out infinite;
+}
+
+.heroTitle span {
+  @apply block text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-purple-800/30;
+}
+
+.heroDesc {
+  @apply text-sm text-white/50 max-w-xl;
+}
+
+.heroMeta {
+  @apply flex flex-wrap gap-3 text-[9px] tracking-[0.4em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.metaItem {
+  @apply border border-white/10 bg-white/5 px-3 py-1;
+}
+
+.heroRight {
+  @apply flex items-start justify-end;
+}
+
+.statDeck {
+  @apply grid grid-cols-1 sm:grid-cols-3 gap-3 w-full;
+}
+
+.statCard {
+  @apply border border-white/10 bg-white/[0.03] p-5 text-left backdrop-blur-md;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+  animation: floatIdle 7s ease-in-out infinite;
+}
+
+.statLabel {
+  @apply text-[9px] tracking-[0.5em] uppercase text-white/30;
+  font-family: var(--font-geist-mono);
+}
+
+.statValue {
+  @apply text-3xl font-black text-white mt-2 block;
+  font-family: var(--font-geist-sans);
+}
+
+.statSub {
+  @apply text-[10px] uppercase tracking-[0.3em] text-white/25 mt-4;
+  font-family: var(--font-geist-mono);
+}
+
+.matrix {
+  @apply mt-16;
+}
+
+.matrixHeader {
+  @apply flex items-center justify-between mb-6;
+}
+
+.matrixTitle {
+  @apply text-[11px] tracking-[0.6em] uppercase text-white/70;
+  font-family: var(--font-geist-mono);
+}
+
+.matrixSub {
+  @apply mt-2 text-[9px] tracking-[0.35em] uppercase text-white/30;
+  font-family: var(--font-geist-mono);
+}
+
+.matrixTag {
+  @apply border border-purple-500/25 bg-purple-500/10 px-3 py-2 text-[9px] tracking-[0.35em] uppercase text-purple-200;
+  font-family: var(--font-geist-mono);
+}
+
+.matrixGrid {
+  @apply grid grid-cols-1 sm:grid-cols-3 gap-4;
+}
+
+.matrixCard {
+  @apply flex items-center gap-4 border border-white/10 bg-white/[0.03] px-4 py-4 backdrop-blur-md transition-all;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.3);
+}
+
+.matrixCard:hover {
+  @apply border-purple-500/40 bg-purple-600/10;
+}
+
+.matrixIcon {
+  @apply w-10 h-10 flex items-center justify-center border border-white/10 bg-white/5 text-purple-200;
+}
+
+.matrixLabel {
+  @apply text-[9px] tracking-[0.4em] uppercase text-white/30;
+  font-family: var(--font-geist-mono);
+}
+
+.matrixValue {
+  @apply text-2xl font-black text-white mt-1;
+  font-family: var(--font-geist-sans);
+}
+
+.roster {
+  @apply mt-16;
+}
+
+.rosterHeader {
+  @apply flex items-center justify-between mb-6;
+}
+
+.rosterTitle {
+  @apply text-[11px] tracking-[0.6em] uppercase text-white/70;
+  font-family: var(--font-geist-mono);
+}
+
+.rosterCount {
+  @apply text-[10px] tracking-[0.45em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.spotlightGrid {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6;
+}
+
+.spotlightCard {
+  @apply relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition-all duration-300;
+  box-shadow: 0 26px 70px rgba(0,0,0,0.45);
+}
+
+.spotlightCard:hover {
+  @apply border-purple-500/50 bg-purple-600/15;
+}
+
+.cardHalo {
+  @apply absolute -top-20 -right-20 w-40 h-40 rounded-full bg-purple-600/10 blur-[60px];
+  animation: haloFloat 12s ease-in-out infinite;
+}
+
+.cardHead {
+  @apply flex items-center justify-between mb-4;
+}
+
+.cardId {
+  @apply text-[9px] tracking-[0.45em] uppercase text-white/30;
+  font-family: var(--font-geist-mono);
+}
+
+.cardStatus {
+  @apply inline-flex items-center gap-2 border border-white/10 bg-white/5 px-2.5 py-1 text-[9px] tracking-[0.2em] uppercase text-white/60;
+  font-family: var(--font-geist-mono);
+}
+
+.statusDot {
+  @apply w-1.5 h-1.5 rounded-full;
+}
+
+.statusActive {
+  @apply text-green-200;
+}
+
+.statusActive .statusDot {
+  @apply bg-green-400 shadow-[0_0_8px_#22c55e];
+}
+
+.statusInactive {
+  @apply text-red-200;
+}
+
+.statusInactive .statusDot {
+  @apply bg-red-400 shadow-[0_0_8px_#f87171];
+}
+
+.cardName {
+  @apply text-2xl font-black tracking-tight uppercase mb-2;
+  font-family: var(--font-geist-sans);
+}
+
+.spotlightCard:hover .cardName {
+  @apply text-purple-200;
+}
+
+.cardTitle {
+  @apply text-[10px] tracking-[0.3em] uppercase text-white/40 mb-6;
+  font-family: var(--font-geist-mono);
+}
+
+.cardFooter {
+  @apply flex items-center justify-between text-[9px] tracking-[0.25em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.cardChip {
+  @apply inline-flex items-center gap-2 border border-purple-500/25 bg-purple-500/10 px-2.5 py-1 text-purple-200;
+}
+
+.cardChipDot {
+  @apply w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.6)];
+}
+
+.cardJoined {
+  @apply text-white/30;
+}
+
+.cardGrid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5;
+}
+
+.card {
+  @apply relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-5 text-left transition-all duration-300;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+}
+
+.card:hover {
+  @apply border-purple-500/40 bg-purple-600/10;
+}
+
+.cardLine {
+  @apply absolute bottom-0 left-0 w-full h-[2px] bg-white/5 overflow-hidden;
+}
+
+.cardLineActive {
+  @apply w-0 h-full bg-purple-600 group-hover:w-full transition-all duration-700;
+}
+
+.cardMeta {
+  @apply flex items-center justify-between text-[9px] tracking-[0.25em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.cardMetaItem {
+  @apply flex items-center gap-2;
+}
+
+.empty {
+  @apply mt-8 border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center;
+}
+
+.emptyTitle {
+  @apply block text-[10px] tracking-[0.6em] uppercase text-white/50;
+  font-family: var(--font-geist-mono);
+}
+
+.emptySub {
+  @apply mt-2 block text-xs text-white/40;
+}
+
+.modal {
+  @apply fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8;
+}
+
+.modalBackdrop {
+  @apply absolute inset-0 bg-black/90 backdrop-blur-2xl;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modalPanel {
+  @apply relative w-full max-w-3xl border border-white/10 bg-[#06060d]/95 p-8 md:p-10 overflow-hidden;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,0.04), transparent 35%),
+    radial-gradient(800px 400px at 10% 0%, rgba(168,85,247,0.18), transparent 60%),
+    radial-gradient(600px 300px at 90% 20%, rgba(244,114,182,0.12), transparent 55%);
+  animation: modalIn 0.45s ease-out;
+}
+
+.modalHeader {
+  @apply relative flex items-center justify-between mb-8 pb-4 border-b border-white/5;
+}
+
+.modalHeader::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 1px;
+  width: 45%;
+  background: linear-gradient(90deg, rgba(168,85,247,0.7), rgba(244,114,182,0.3), transparent);
+  opacity: 0.7;
+}
+
+.modalTag {
+  @apply text-[9px] tracking-[0.35em] uppercase text-purple-200 border border-purple-500/30 bg-purple-500/10 px-2 py-1;
+  font-family: var(--font-geist-mono);
+}
+
+.modalName {
+  @apply mt-2 text-3xl md:text-4xl font-black uppercase tracking-tight;
+  text-shadow: 0 0 24px rgba(168,85,247,0.25);
+}
+
+.modalClose {
+  @apply text-white/50 hover:text-white transition-colors;
+}
+
+.modalBody {
+  @apply flex flex-col md:flex-row gap-8 relative z-10;
+}
+
+.modalAvatar {
+  @apply w-20 h-20 md:w-24 md:h-24 border border-white/10 bg-white/5 flex items-center justify-center text-white/70;
+  box-shadow: inset 0 0 24px rgba(168,85,247,0.12);
+}
+
+.modalInfo {
+  @apply flex-1;
+}
+
+.modalMeta {
+  @apply flex flex-wrap items-center gap-3 text-[9px] tracking-[0.3em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.modalPill {
+  @apply border border-white/10 bg-white/5 px-2 py-1;
+}
+
+.modalDot {
+  @apply w-1 h-1 rounded-full bg-purple-400/60;
+}
+
+.modalGrid {
+  @apply mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4;
+}
+
+.modalItem {
+  @apply border border-white/10 bg-white/[0.04] p-4 flex flex-col gap-2 min-h-[96px] rounded-lg transition-all duration-300;
+  box-shadow: inset 0 0 24px rgba(255,255,255,0.02);
+  background-image: linear-gradient(140deg, rgba(255,255,255,0.04), transparent 60%);
+}
+
+.modalItem:hover {
+  border-color: rgba(168,85,247,0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+}
+
+.modalLabel {
+  @apply text-[8px] tracking-[0.3em] uppercase text-white/30;
+  font-family: var(--font-geist-mono);
+}
+
+.modalValue {
+  @apply text-[13px] font-semibold text-white leading-relaxed break-words;
+  font-family: var(--font-geist-sans);
+}
+
+.modalAction {
+  @apply mt-8 w-full border border-purple-500/40 bg-purple-500/20 py-4 text-[9px] tracking-[0.5em] uppercase font-black text-white hover:bg-purple-500/40 transition-all;
+  font-family: var(--font-geist-mono);
+  background-image: linear-gradient(120deg, rgba(168,85,247,0.25), rgba(244,114,182,0.15));
+  background-size: 200% 200%;
+  box-shadow: 0 18px 40px rgba(88,28,135,0.35);
+}
+
+.modalAction:hover {
+  background-position: right center;
+  box-shadow: 0 22px 50px rgba(168,85,247,0.35);
+}
+
+.modalStamp {
+  @apply absolute -bottom-6 -right-4 text-[11px] tracking-[0.6em] uppercase text-white/10;
+  font-family: var(--font-geist-mono);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-35%); opacity: 0; }
+  30% { opacity: 0.08; }
+  100% { transform: translateY(35%); opacity: 0; }
+}
+
+@keyframes haloFloat {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, -54%); }
+}
+
+@keyframes sweep {
+  0%, 100% { transform: translateX(-10%) translateY(-6%); opacity: 0.2; }
+  50% { transform: translateX(10%) translateY(6%); opacity: 0.45; }
+}
+
+@keyframes titleGlow {
+  0%, 100% { text-shadow: 0 0 12px rgba(168,85,247,0.2), 0 0 30px rgba(124,58,237,0.12); }
+  50% { text-shadow: 0 0 20px rgba(168,85,247,0.35), 0 0 60px rgba(124,58,237,0.24); }
+}
+
+@keyframes floatIdle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@media (max-width: 768px) {
+  .navCenter {
+    @apply hidden;
+  }
+}

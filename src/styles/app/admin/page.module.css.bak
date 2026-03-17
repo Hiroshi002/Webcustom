@@ -1,0 +1,485 @@
+.page {
+  @apply relative min-h-screen bg-[#071012] text-white selection:bg-emerald-500/50 overflow-x-hidden;
+  font-family: var(--font-geist-sans);
+}
+
+.background {
+  @apply fixed inset-0 z-0 pointer-events-none;
+}
+
+.background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--random-bg-url, url("/globe.svg"));
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.12;
+}
+
+.radialSpot {
+  @apply absolute inset-0 opacity-30 transition-opacity duration-1000;
+  background: radial-gradient(800px at var(--spot-x, 50%) var(--spot-y, 0%), rgba(16,185,129,0.2), transparent 60%);
+  will-change: opacity;
+}
+
+.gridPattern {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(to right, #ffffff06 1px, transparent 1px),
+    linear-gradient(to bottom, #ffffff06 1px, transparent 1px),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 14px);
+  background-size: 64px 64px, 64px 64px, 120px 120px;
+  mask-image: radial-gradient(ellipse 80% 55% at 50% 45%, #000 65%, transparent 100%);
+}
+
+.shojiPattern {
+  position: absolute;
+  inset: -10%;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 120px 120px;
+  opacity: 0.25;
+  mask-image: radial-gradient(ellipse 70% 40% at 50% 50%, #000 55%, transparent 100%);
+}
+
+.horizonGlow {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: 15%;
+  height: 220px;
+  background: linear-gradient(90deg, transparent, rgba(16,185,129,0.22), rgba(34,211,238,0.12), transparent);
+  filter: blur(24px);
+  opacity: 0.7;
+  will-change: transform, opacity;
+}
+
+.sakuraHalo {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  left: 8%;
+  top: 12%;
+  background: radial-gradient(circle, rgba(52,211,153,0.18), rgba(16,185,129,0.1), transparent 65%);
+  filter: blur(6px);
+  opacity: 0.8;
+  animation: haloFloat 8s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.nav {
+  @apply fixed top-0 inset-x-0 z-50;
+}
+
+.navFrame {
+  @apply max-w-6xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between gap-6 border-b border-white/5 bg-black/30 backdrop-blur-xl;
+}
+
+.navLeft {
+  @apply flex items-center gap-4;
+}
+
+.navBack {
+  @apply flex items-center gap-3 text-white/70 hover:text-white transition-colors;
+}
+
+.navIcon {
+  @apply flex items-center justify-center w-9 h-9 border border-white/10 bg-white/5;
+}
+
+.navText {
+  @apply hidden md:block text-[10px] tracking-[0.45em] uppercase;
+  font-family: var(--font-geist-mono);
+}
+
+.navBadge {
+  @apply hidden sm:flex items-center gap-2 border border-white/10 bg-white/5 px-3 py-2;
+}
+
+.navBadgeLabel {
+  @apply text-[9px] tracking-[0.4em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.navBadgeValue {
+  @apply text-[10px] tracking-[0.3em] uppercase text-emerald-200;
+  font-family: var(--font-geist-mono);
+}
+
+.navCenter {
+  @apply hidden md:flex flex-col items-center gap-1;
+}
+
+.navTitle {
+  @apply text-[11px] tracking-[0.5em] uppercase text-white/70;
+  font-family: var(--font-geist-mono);
+}
+
+.navSubtitle {
+  @apply text-[9px] tracking-[0.4em] uppercase text-white/30;
+  font-family: var(--font-geist-mono);
+}
+
+.navRight {
+  @apply flex items-center gap-3;
+}
+
+.navChip {
+  @apply hidden lg:inline-flex items-center gap-2 border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[9px] tracking-[0.3em] uppercase text-emerald-100;
+  font-family: var(--font-geist-mono);
+}
+
+.navChipLabel {
+  @apply text-white/50;
+}
+
+.navChipValue {
+  @apply text-emerald-100;
+}
+
+.navLink {
+  @apply flex items-center gap-2 border border-purple-500/20 bg-purple-500/10 px-3 py-2 text-[9px] tracking-[0.3em] uppercase text-purple-200/80;
+  font-family: var(--font-geist-mono);
+}
+
+.toastWrapper {
+  @apply fixed top-8 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-[200];
+  animation: slideIn 0.5s ease-out;
+}
+
+.toastBox {
+  @apply bg-red-600 text-white px-6 py-4 flex items-center gap-4 shadow-[0_0_30px_rgba(239,68,68,0.4)] border border-red-400/50;
+}
+
+.toastIcon {
+  @apply animate-pulse flex-shrink-0;
+}
+
+.toastTextWrapper {
+  @apply flex flex-col;
+}
+
+.toastTitle {
+  @apply text-[10px] font-black tracking-widest uppercase italic;
+}
+
+.toastDesc {
+  @apply text-[8px] font-bold opacity-80 uppercase;
+}
+
+.container {
+  @apply relative z-10 max-w-6xl mx-auto px-6 md:px-10 pt-32 pb-24;
+}
+
+.hero {
+  @apply grid gap-10 lg:grid-cols-[1.2fr_0.8fr] items-start;
+}
+
+.heroMain {
+  @apply space-y-6;
+}
+
+.heroKicker {
+  @apply text-[10px] tracking-[0.5em] uppercase text-emerald-200/70;
+  font-family: var(--font-geist-mono);
+}
+
+.heroTitle {
+  @apply text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none uppercase;
+  font-family: var(--font-geist-sans);
+}
+
+.heroTitle span {
+  @apply block text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-white/30;
+}
+
+.heroSub {
+  @apply text-base text-white/55 max-w-xl;
+}
+
+.heroMeta {
+  @apply flex flex-wrap gap-3;
+}
+
+.heroMetaItem {
+  @apply inline-flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2 text-[9px] tracking-[0.3em] uppercase text-white/70;
+  font-family: var(--font-geist-mono);
+}
+
+.heroPanel {
+  @apply border border-emerald-500/20 bg-white/[0.04] backdrop-blur-md p-6 md:p-8 rounded-2xl;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+  background-image:
+    radial-gradient(600px 300px at 10% 0%, rgba(16,185,129,0.18), transparent 60%),
+    radial-gradient(500px 240px at 90% 20%, rgba(45,212,191,0.12), transparent 60%);
+}
+
+.statusHeader {
+  @apply flex items-center justify-between gap-4 mb-4;
+}
+
+.statusLabel {
+  @apply text-[9px] tracking-[0.45em] uppercase text-emerald-200/70;
+  font-family: var(--font-geist-mono);
+}
+
+.statusBadge {
+  @apply inline-flex items-center gap-2 border px-3 py-2 text-[9px] tracking-[0.35em] uppercase;
+  font-family: var(--font-geist-mono);
+}
+
+.statusBadgeSafe {
+  @apply border-emerald-500/30 bg-emerald-500/10 text-emerald-200;
+}
+
+.statusBadgeDanger {
+  @apply border-red-500/30 bg-red-500/10 text-red-200;
+}
+
+.statusTitle {
+  @apply text-2xl sm:text-3xl font-black italic tracking-tight uppercase;
+}
+
+.statusGrid {
+  @apply mt-6 grid grid-cols-2 gap-4 text-[10px] tracking-[0.3em] uppercase;
+  font-family: var(--font-geist-mono);
+}
+
+.statusItem {
+  @apply flex flex-col gap-2 border border-white/10 bg-white/5 px-4 py-3 rounded-lg;
+}
+
+.statusKey {
+  @apply text-white/40;
+}
+
+.statusValue {
+  @apply text-white;
+}
+
+.toggleButton {
+  @apply mt-6 w-full border border-emerald-500/30 bg-emerald-500/10 py-3 text-[10px] tracking-[0.4em] uppercase text-emerald-200 transition-all;
+  font-family: var(--font-geist-mono);
+}
+
+.toggleButtonActive {
+  @apply border-red-500/40 bg-red-500/10 text-red-200;
+}
+
+.coreGrid {
+  @apply mt-12 grid gap-6 lg:grid-cols-[1.1fr_0.9fr];
+}
+
+.identityCard {
+  @apply border border-white/10 bg-white/5 backdrop-blur-sm p-6 md:p-8 relative overflow-hidden rounded-2xl;
+}
+
+.identityHeader {
+  @apply flex flex-col sm:flex-row items-center sm:items-start gap-6;
+}
+
+.identityImageWrap {
+  @apply relative;
+}
+
+.identityGlow {
+  @apply absolute -inset-2 bg-emerald-500/20 blur-xl group-hover:bg-emerald-500/40 transition-all duration-1000 rounded-full;
+}
+
+.identityImageFrame {
+  @apply relative w-24 h-24 md:w-28 md:h-28 border border-white/10 p-2 bg-black overflow-hidden;
+}
+
+.identityImg {
+  @apply w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700;
+}
+
+.identityPlaceholder {
+  @apply w-full h-full bg-white/5 flex items-center justify-center text-white/10 italic;
+}
+
+.identityInfo {
+  @apply flex-1 text-center sm:text-left;
+}
+
+.identityTag {
+  @apply inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 mb-4 text-[9px] tracking-[0.35em] uppercase;
+  font-family: var(--font-geist-mono);
+}
+
+.identityName {
+  @apply text-3xl sm:text-4xl md:text-5xl font-black italic tracking-tight uppercase;
+}
+
+.identityRole {
+  @apply mt-2 text-[10px] tracking-[0.4em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.identityGrid {
+  @apply mt-8 grid grid-cols-2 gap-4 text-[10px] tracking-[0.3em] uppercase;
+  font-family: var(--font-geist-mono);
+}
+
+.identityItem {
+  @apply flex flex-col gap-2 border border-white/10 bg-white/5 px-4 py-3 rounded-lg;
+}
+
+.identityKey {
+  @apply text-white/40;
+}
+
+.identityValue {
+  @apply text-white;
+}
+
+.alertCard {
+  @apply border border-emerald-500/20 bg-white/[0.03] backdrop-blur-md p-6 md:p-8 rounded-2xl;
+}
+
+.alertHeader {
+  @apply flex flex-col gap-2 mb-6;
+}
+
+.alertKicker {
+  @apply text-[9px] tracking-[0.4em] uppercase text-emerald-200/60;
+  font-family: var(--font-geist-mono);
+}
+
+.alertTitle {
+  @apply text-2xl sm:text-3xl font-black italic tracking-tight uppercase;
+}
+
+.alertGrid {
+  @apply grid grid-cols-2 gap-4 text-[10px] tracking-[0.3em] uppercase;
+  font-family: var(--font-geist-mono);
+}
+
+.alertItem {
+  @apply flex flex-col gap-2 border border-white/10 bg-white/5 px-4 py-3 rounded-lg;
+}
+
+.alertLabel {
+  @apply text-white/40;
+}
+
+.alertValue {
+  @apply text-white;
+}
+
+.actionGrid {
+  @apply mt-12 grid gap-4 md:grid-cols-2;
+}
+
+.actionCard {
+  @apply relative border border-white/10 bg-white/5 backdrop-blur-sm p-6 md:p-8 transition-all duration-300 hover:border-emerald-500/40 hover:bg-emerald-500/10 rounded-2xl;
+}
+
+.actionCardWide {
+  @apply md:col-span-2;
+}
+
+.actionCardDanger {
+  @apply hover:border-red-500/40 hover:bg-red-500/10;
+}
+
+.actionTop {
+  @apply flex items-start justify-between gap-4;
+}
+
+.actionIcon {
+  @apply w-12 h-12 border border-white/10 bg-black/40 flex items-center justify-center text-emerald-200;
+}
+
+.actionCardDanger .actionIcon {
+  @apply text-red-300 border-red-500/20 bg-red-500/5;
+}
+
+.actionTitle {
+  @apply text-xl md:text-2xl font-black italic tracking-tight uppercase;
+}
+
+.actionDesc {
+  @apply text-[10px] tracking-[0.35em] uppercase text-white/40 mt-3;
+  font-family: var(--font-geist-mono);
+}
+
+.actionFooter {
+  @apply mt-6 flex items-center gap-2 text-[9px] tracking-[0.35em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.actionChevron {
+  @apply text-emerald-300 group-hover:text-emerald-200;
+}
+
+.actionCardDanger .actionChevron {
+  @apply text-red-400 group-hover:text-red-200;
+}
+
+.modalOverlay {
+  @apply fixed inset-0 z-[500] flex items-center justify-center p-6;
+}
+
+.modalBackdrop {
+  @apply absolute inset-0 bg-black/90 backdrop-blur-2xl;
+}
+
+.modalContent {
+  @apply relative w-full max-w-lg border border-white/10 bg-[#050508] p-8 md:p-12 rounded-2xl;
+  animation: zoomIn 0.5s ease-out;
+}
+
+.modalHeader {
+  @apply flex items-center justify-between mb-6;
+}
+
+.modalTitle {
+  @apply inline-flex items-center gap-3 text-lg font-black tracking-[0.3em] uppercase;
+  font-family: var(--font-geist-mono);
+}
+
+.modalClose {
+  @apply text-white/40 hover:text-white transition-colors;
+}
+
+.modalDesc {
+  @apply text-[10px] tracking-[0.3em] uppercase text-white/40 mb-8;
+  font-family: var(--font-geist-mono);
+}
+
+.modalActions {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.modalConfirm {
+  @apply py-4 bg-red-600 text-white font-black text-[10px] tracking-[0.4em] uppercase active:scale-95 transition-all;
+  font-family: var(--font-geist-mono);
+}
+
+.modalCancel {
+  @apply py-4 bg-white/5 border border-white/10 text-white font-black text-[10px] tracking-[0.4em] uppercase active:scale-95 transition-all;
+  font-family: var(--font-geist-mono);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px) translateX(-50%); }
+  to { opacity: 1; transform: translateY(0) translateX(-50%); }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes haloFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-18px) scale(1.05);
+  }
+}

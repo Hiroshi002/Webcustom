@@ -1,0 +1,381 @@
+.mainContainer {
+  @apply relative min-h-screen bg-[#05030a] text-white selection:bg-purple-500/50;
+  font-family: var(--font-geist-sans);
+}
+
+.backgroundLayer {
+  @apply fixed inset-0 z-0 pointer-events-none;
+}
+
+.backgroundLayer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--random-bg-url, url("/globe.svg"));
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.12;
+}
+
+.bgRadial {
+  @apply absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#2a0f3b_0%,#05030a_70%)] opacity-80;
+}
+
+.bgGrid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(to right, #ffffff0a 1px, transparent 1px),
+    linear-gradient(to bottom, #ffffff0a 1px, transparent 1px);
+  background-size: 70px 70px;
+  mask-image: radial-gradient(ellipse 75% 50% at 50% 45%, #000 65%, transparent 100%);
+}
+
+.bgShoji {
+  position: absolute;
+  inset: -10%;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 120px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 120px);
+  opacity: 0.18;
+  mask-image: radial-gradient(ellipse 70% 45% at 50% 45%, #000 60%, transparent 100%);
+}
+
+.bgHorizon {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: 15%;
+  height: 220px;
+  background: linear-gradient(90deg, transparent, rgba(168,85,247,0.26), rgba(59,130,246,0.15), transparent);
+  filter: blur(26px);
+  opacity: 0.6;
+}
+
+.bgHalo {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  left: 8%;
+  top: 10%;
+  background: radial-gradient(circle, rgba(168,85,247,0.22), rgba(59,130,246,0.12), transparent 65%);
+  filter: blur(6px);
+  opacity: 0.8;
+  animation: haloFloat 8s ease-in-out infinite;
+}
+
+.navBar {
+  @apply fixed top-0 w-full z-50 px-6 py-4 md:py-6 flex justify-between items-center backdrop-blur-xl border-b border-white/5 bg-black/30;
+}
+
+.backLink {
+  @apply flex items-center gap-3;
+}
+
+.backIconWrapper {
+  @apply p-2 bg-purple-600/10 border border-purple-500/20 hover:bg-purple-600/30 transition-all duration-300;
+}
+
+.backText {
+  @apply hidden sm:inline text-[10px] font-black tracking-[0.5em] uppercase text-white/70;
+  font-family: var(--font-geist-mono);
+}
+
+.navRight {
+  @apply flex flex-wrap items-center gap-3;
+}
+
+.navDropdown {
+  @apply flex items-center;
+}
+
+.searchContainer {
+  @apply relative;
+}
+
+.searchIcon {
+  @apply absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400 pointer-events-none;
+}
+
+.searchInput {
+  @apply bg-white/5 border border-white/10 py-2.5 pl-10 pr-6 text-[10px] tracking-widest focus:border-purple-600 outline-none w-32 sm:w-60 md:w-72 max-w-full transition-all duration-300 uppercase placeholder:text-white/20;
+  font-family: var(--font-geist-mono);
+}
+
+.searchUnderline {
+  @apply absolute bottom-0 left-0 h-[1px] w-0 bg-purple-500 transition-all duration-500;
+}
+
+.searchContainer:focus-within .searchUnderline {
+  @apply w-full;
+}
+
+.pageFrame {
+  @apply relative z-10 max-w-7xl mx-auto px-6 md:px-8 pt-32 pb-32 space-y-14;
+}
+
+.headerGrid {
+  @apply grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-start;
+}
+
+.headerMain {
+  @apply space-y-6;
+}
+
+.headerKicker {
+  @apply inline-flex items-center gap-2 text-[9px] font-black tracking-[0.6em] text-purple-400 uppercase;
+  font-family: var(--font-geist-mono);
+}
+
+.headerTitle {
+  @apply text-5xl sm:text-6xl md:text-7xl font-black tracking-tight uppercase;
+}
+
+.headerTitle span {
+  @apply text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-300 to-purple-600;
+}
+
+.headerSubtitle {
+  @apply text-sm text-white/50 max-w-lg;
+}
+
+.headerMeta {
+  @apply flex flex-wrap gap-3 text-[9px] font-black tracking-[0.4em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.metaItem {
+  @apply border border-white/10 px-3 py-2 bg-white/5;
+}
+
+.headerSide {
+  @apply space-y-6;
+}
+
+.statRow {
+  @apply grid grid-cols-2 gap-4;
+}
+
+.statCard {
+  @apply bg-white/5 border border-white/10 p-5 backdrop-blur-lg shadow-[0_0_30px_rgba(7,3,20,0.6)];
+}
+
+.statLabel {
+  @apply text-[9px] font-black tracking-widest text-white/40 uppercase;
+  font-family: var(--font-geist-mono);
+}
+
+.statValue {
+  @apply text-3xl font-black text-purple-400 mt-3;
+  font-family: var(--font-geist-sans);
+}
+
+.actionPanel {
+  @apply flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between border border-white/10 bg-white/5 p-5 backdrop-blur-xl;
+}
+
+.actionPrimary {
+  @apply inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 to-blue-500 px-6 py-3 text-[10px] font-black tracking-[0.4em] uppercase text-white hover:scale-[1.01] transition-all duration-300;
+  font-family: var(--font-geist-mono);
+}
+
+.actionInfo {
+  @apply flex items-center gap-2 text-[9px] font-black tracking-[0.4em] uppercase text-white/50;
+  font-family: var(--font-geist-mono);
+}
+
+.controlBar {
+  @apply grid gap-4 lg:grid-cols-[280px_1fr_auto] items-center border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-xl;
+}
+
+.filterGroup {
+  @apply flex flex-wrap items-center gap-3;
+}
+
+.filterChip {
+  @apply border border-white/10 bg-black/40 px-3 py-2 text-[9px] font-black tracking-[0.4em] uppercase text-white/50 transition-all duration-300;
+  font-family: var(--font-geist-mono);
+}
+
+.filterChipActive {
+  @apply border-purple-500/60 text-purple-200 bg-purple-600/15;
+}
+
+.controlMeta {
+  @apply inline-flex items-center gap-2 text-[9px] font-black tracking-[0.4em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.listSection {
+  @apply space-y-6;
+}
+
+.listHeader {
+  @apply flex items-center justify-between;
+}
+
+.listTitle {
+  @apply text-lg font-black tracking-[0.4em] uppercase text-white/70;
+  font-family: var(--font-geist-mono);
+}
+
+.listCount {
+  @apply text-[10px] font-black tracking-[0.4em] uppercase text-white/30;
+  font-family: var(--font-geist-mono);
+}
+
+.listGrid {
+  @apply grid gap-4 lg:grid-cols-2;
+}
+
+.userCard {
+  @apply relative border border-white/10 bg-white/5 p-5 backdrop-blur-xl transition-all duration-300 hover:border-purple-500/40;
+}
+
+.cardGlow {
+  @apply absolute inset-0 opacity-0 transition-opacity duration-300 pointer-events-none;
+  background: radial-gradient(circle at top, rgba(168,85,247,0.18), transparent 60%);
+}
+
+.userCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.userCard:hover .cardGlow {
+  @apply opacity-100;
+}
+
+.cardHeader {
+  @apply flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+}
+
+.cardIdentity {
+  @apply flex flex-col gap-2;
+}
+
+.cardCode {
+  @apply text-[9px] font-black tracking-[0.4em] uppercase text-white/30;
+  font-family: var(--font-geist-mono);
+}
+
+.cardName {
+  @apply text-2xl font-black tracking-tight uppercase text-white;
+}
+
+.cardTitle {
+  @apply text-[10px] font-black tracking-[0.4em] uppercase text-white/40;
+  font-family: var(--font-geist-mono);
+}
+
+.cardStatus {
+  @apply inline-flex items-center gap-2 text-[9px] font-black tracking-[0.4em] uppercase;
+  font-family: var(--font-geist-mono);
+}
+
+.cardMeta {
+  @apply grid gap-4 sm:grid-cols-2 mt-4;
+}
+
+.metaItem {
+  @apply flex flex-col gap-2 border border-white/10 bg-black/40 px-4 py-3;
+}
+
+.metaLabel {
+  @apply text-[8px] font-black tracking-[0.4em] uppercase text-white/30;
+  font-family: var(--font-geist-mono);
+}
+
+.metaValue {
+  @apply flex items-center gap-2 text-[10px] font-black tracking-[0.35em] uppercase text-white/70;
+  font-family: var(--font-geist-mono);
+}
+
+.statusDot {
+  @apply w-2 h-2 rounded-full;
+}
+
+.cardActions {
+  @apply flex flex-wrap gap-3 justify-start mt-5;
+}
+
+.cardAction {
+  @apply flex items-center justify-center gap-2 border border-white/10 bg-white/5 px-3 py-2 text-[10px] font-black tracking-[0.4em] uppercase text-white/60 hover:text-white hover:border-white/30 transition-all duration-300;
+  font-family: var(--font-geist-mono);
+}
+
+.cardActionDanger {
+  @apply hover:border-red-500/50 hover:text-red-400;
+}
+
+.actionLabel {
+  @apply hidden sm:inline;
+}
+
+.emptyState {
+  @apply border border-dashed border-white/10 bg-white/5 px-6 py-10 text-center text-[10px] font-black tracking-[0.4em] uppercase text-white/30;
+  font-family: var(--font-geist-mono);
+}
+
+@media (max-width: 639px) {
+  .controlBar {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modalOverlay {
+  @apply fixed inset-0 z-[600] flex items-center justify-center p-4;
+}
+
+.modalBackdrop {
+  @apply absolute inset-0 bg-black/80 backdrop-blur-2xl;
+}
+
+.modalContent {
+  @apply relative w-full max-w-2xl border border-white/10 bg-[#0a0a15] p-8 shadow-[0_0_60px_rgba(7,3,20,0.8)];
+}
+
+.modalHeader {
+  @apply flex items-center justify-between mb-6;
+}
+
+.modalTitle {
+  @apply flex items-center gap-3 text-2xl font-black tracking-[0.2em] uppercase;
+  font-family: var(--font-geist-sans);
+}
+
+.modalClose {
+  @apply text-white/30 hover:text-white transition-colors;
+}
+
+.modalBody {
+  @apply grid gap-4;
+}
+
+.input {
+  @apply w-full bg-black/60 border border-white/10 p-4 text-xs font-black uppercase outline-none focus:border-purple-600 transition-all duration-300 placeholder:text-white/20;
+  font-family: var(--font-geist-mono);
+}
+
+.primaryButton {
+  @apply w-full bg-gradient-to-r from-purple-600 to-blue-500 py-4 text-[10px] font-black tracking-[0.4em] uppercase text-white transition-all duration-300;
+  font-family: var(--font-geist-mono);
+}
+
+.modalText {
+  @apply text-sm text-white/60;
+}
+
+.dangerButton {
+  @apply w-full bg-red-600/90 hover:bg-red-500 text-white py-3 text-[10px] font-black tracking-[0.4em] uppercase transition-all duration-300;
+  font-family: var(--font-geist-mono);
+}
+
+@keyframes haloFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-18px) scale(1.05);
+  }
+}
