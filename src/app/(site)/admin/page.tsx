@@ -11,7 +11,7 @@ import styles from "@/styles/app/admin/page.module.css";
 
 export default function AdminPage() {
   // const { data: session, status } = useSession();
-  const sessionContext = useSession;
+  const sessionContext = useSession();
   const session = sessionContext?.data;
   const status = sessionContext?.status;
   const router = useRouter();
