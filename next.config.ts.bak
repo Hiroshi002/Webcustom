@@ -1,0 +1,38 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // เพิ่มส่วนนี้เพื่อแก้ปัญหา Discord.js Build Error
+  serverExternalPackages: [
+    'discord.js',
+    '@discordjs/ws',
+    '@discordjs/rest',
+    'zlib-sync',
+    'bufferutil',
+    'utf-8-validate'
+  ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.discordapp.com',
+        pathname: '/**',
+      },
+    ],
+  },
+
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            // แนะนำให้เพิ่มความปลอดภัยสำหรับรูปภาพโปรไฟล์ Discord ด้วย
+            value: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; img-src 'self' data: https://cdn.discordapp.com;",
+          },
+        ],
+      },
+    ]
+  },
+};
+
+export default nextConfig;
