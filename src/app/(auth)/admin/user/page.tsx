@@ -1,0 +1,558 @@
+"use client";
+
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import Link from "next/link";
+import UnifiedLoader from "@/components/loading/LoadingScreen";
+import AdminDropdown from "@/components/Admin/AdminDropdown";
+import styles from "@/styles/app/page.module.css";
+import {
+  ArrowLeft,
+  Search,
+  User,
+  Shield,
+  X,
+  Cpu,
+  Trash2,
+  Edit3,
+  Plus,
+  Save,
+  Crown,
+  Radio,
+} from "lucide-react";
+
+type Member = {
+  id: number;
+  name: string;
+  title: string;
+  role: string;
+  status: "ACTIVE" | "INACTIVE" | "PENDING" | "SUSPENDED";
+  joined?: string;
+};
+
+type FormData = {
+  name: string;
+  title: string;
+  role: string;
+  status: Member["status"];
+};
+
+const ROLES = ["HEAD", "LEAD", "SUPPORT", "EXCLUSIVE", "S.VIP", "VIP", "CONSTANCY"];
+
+const STATUS_THEMES = {
+  ACTIVE: "text-green-400",
+  INACTIVE: "text-red-400",
+  PENDING: "text-yellow-300",
+  SUSPENDED: "text-gray-400",
+};
+
+export default function AdminUserPage() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [users, setUsers] = useState<Member[]>([]);
+  const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [editingUser, setEditingUser] = useState<Member | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    title: "",
+    role: "CONSTANCY",
+    status: "ACTIVE",
+  });
+
+  useEffect(() => {
+    const audio = (window as unknown as { __bgAudio?: HTMLAudioElement }).__bgAudio;
+    if (!audio) return undefined;
+    const prevMuted = audio.muted;
+    const prevVolume = audio.volume;
+    const wasPaused = audio.paused;
+    audio.pause();
+    audio.muted = true;
+    audio.volume = 0;
+    return () => {
+      audio.muted = prevMuted;
+      audio.volume = prevVolume;
+      if (!wasPaused) {
+        audio.play().catch(() => {});
+      }
+    };
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      const response = await fetch("/api/members?order=joined&direction=desc", {
+        cache: "no-store",
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setUsers(data as Member[]);
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    let isActive = true;
+
+    const refresh = async () => {
+      if (!isActive) return;
+      if (document.visibilityState !== "visible") return;
+      await loadUsers();
+    };
+
+    refresh();
+
+    let interval: number | null = null;
+    const start = () => {
+      if (interval !== null) return;
+      interval = window.setInterval(() => {
+        refresh();
+      }, 6000);
+    };
+    const stop = () => {
+      if (interval === null) return;
+      window.clearInterval(interval);
+      interval = null;
+    };
+    start();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refresh();
+        start();
+      } else {
+        stop();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      isActive = false;
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+
+  const filteredUsers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return users;
+    return users.filter((u) =>
+      [u.name, u.title, u.role].some((v) => v?.toLowerCase().includes(q))
+    );
+  }, [search, users]);
+
+  const selectedUser = useMemo(() => {
+    const pool = filteredUsers.length ? filteredUsers : users;
+    if (!pool.length) return null;
+    if (selectedId === null) return pool[0];
+    return pool.find((u) => u.id === selectedId) ?? pool[0];
+  }, [filteredUsers, users, selectedId]);
+
+  useEffect(() => {
+    if (selectedUser && selectedId !== selectedUser.id) {
+      setSelectedId(selectedUser.id);
+    }
+  }, [selectedUser, selectedId]);
+
+  const stats = useMemo(() => {
+    const total = users.length;
+    const active = users.filter((u) => u.status === "ACTIVE").length;
+    const roles = new Set(users.map((u) => u.role)).size;
+    return { total, active, roles };
+  }, [users]);
+
+  const handleCreate = async () => {
+    if (!formData.name.trim()) return;
+    const payload = {
+      name: formData.name.trim(),
+      title: formData.title.trim(),
+      role: formData.role,
+      status: formData.status,
+      joined: new Date().toISOString(),
+    };
+    try {
+      const response = await fetch("/api/members", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      });
+      if (response.ok) {
+        await loadUsers();
+        setFormData({ name: "", title: "", role: "CONSTANCY", status: "ACTIVE" });
+        setShowForm(false);
+      }
+    } catch {}
+  };
+
+  const handleUpdate = async () => {
+    if (!editingUser) return;
+    const payload = {
+      name: editingUser.name.trim(),
+      title: editingUser.title.trim(),
+      role: editingUser.role,
+      status: editingUser.status,
+    };
+    try {
+      const response = await fetch("/api/members", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, id: editingUser.id }),
+        cache: "no-store",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsers((current) => current.map((u) => (u.id === data.id ? (data as Member) : u)));
+      }
+      setEditingUser(null);
+    } catch {}
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      const response = await fetch("/api/members", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: deleteId }),
+        cache: "no-store",
+      });
+      if (response.ok) {
+        await loadUsers();
+        setDeleteId(null);
+      }
+    } catch {}
+  };
+
+  if (isLoading) return <UnifiedLoader onFinished={() => setIsLoading(false)} />;
+
+  const spotStyle = {
+    "--spot-x": "50%",
+    "--spot-y": "15%",
+  } as CSSProperties;
+
+  return (
+    <main className={styles.mainContainer}>
+      <div className={styles.backgroundLayer}>
+        <div className={styles.radialSpot} style={spotStyle} />
+        <div className={styles.gridPattern} />
+        <div className={styles.shojiPattern} />
+        <div className={styles.horizonGlow} />
+        <div className={styles.sakuraHalo} />
+        <div className={styles.orbitSweep} />
+        <div className={styles.particleField} />
+        <div className={styles.scanline} />
+      </div>
+
+      <nav className="fixed top-0 w-full z-50 px-6 md:px-8">
+        <div className={styles.topBar}>
+          <Link href="/admin" className="flex items-center gap-3">
+            <div className="p-2 bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500/30 transition-all duration-300">
+              <ArrowLeft size={16} />
+            </div>
+            <span className="hidden sm:inline text-[10px] font-black tracking-[0.5em] uppercase text-white/70">
+              Back_to_Admin
+            </span>
+          </Link>
+
+          <div className="flex flex-wrap items-center gap-3 justify-end">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-400 pointer-events-none" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="SEARCH_OPERATOR..."
+                className="bg-white/5 border border-white/10 py-2.5 pl-10 pr-6 text-[10px] tracking-widest focus:border-cyan-500 outline-none w-32 sm:w-60 md:w-72 max-w-[70vw] transition-all duration-300 uppercase placeholder:text-white/20"
+              />
+              <div className="absolute bottom-0 left-0 h-[1px] w-0 bg-cyan-400 transition-all duration-500 focus-within:w-full" />
+            </div>
+            <AdminDropdown />
+          </div>
+        </div>
+      </nav>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-8 pt-32 pb-24 space-y-10">
+        <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 text-[9px] font-black tracking-[0.6em] text-cyan-400 uppercase">
+              <Radio size={12} />
+              USER PROFILE NODE
+            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight uppercase">
+              OPERATOR <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-sky-300 to-cyan-500">PROFILE</span>
+            </h1>
+            <p className="text-sm text-white/50 max-w-xl">
+              Curated user dossier with live updates and controlled authorization lanes.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <div className="border border-white/10 bg-white/5 px-4 py-4 text-center min-w-[110px] flex-1">
+              <div className="text-[9px] font-black tracking-[0.4em] uppercase text-white/40">TOTAL</div>
+              <div className="text-2xl font-black text-cyan-400 mt-2">{stats.total}</div>
+            </div>
+            <div className="border border-white/10 bg-white/5 px-4 py-4 text-center min-w-[110px] flex-1">
+              <div className="text-[9px] font-black tracking-[0.4em] uppercase text-white/40">ACTIVE</div>
+              <div className="text-2xl font-black text-green-400 mt-2">{stats.active}</div>
+            </div>
+            <div className="border border-white/10 bg-white/5 px-4 py-4 text-center min-w-[110px] flex-1">
+              <div className="text-[9px] font-black tracking-[0.4em] uppercase text-white/40">ROLES</div>
+              <div className="text-2xl font-black text-sky-300 mt-2">{stats.roles}</div>
+            </div>
+          </div>
+        </header>
+
+        <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
+          <aside className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black tracking-[0.4em] uppercase text-white/50">OPERATORS</span>
+              <button
+                className="inline-flex items-center gap-2 border border-white/10 bg-white/5 px-3 py-2 text-[9px] font-black tracking-[0.4em] uppercase text-white/70 hover:text-white hover:border-cyan-400/60 transition-all"
+                onClick={() => setShowForm(true)}
+                type="button"
+              >
+                <Plus size={12} />
+                NEW
+              </button>
+            </div>
+            <div className="space-y-3">
+              {filteredUsers.map((u, idx) => (
+                <button
+                  key={u.id}
+                  type="button"
+                  onClick={() => setSelectedId(u.id)}
+                  className={`w-full text-left border border-white/10 bg-white/5 px-4 py-4 transition-all duration-300 hover:border-cyan-500/50 ${
+                    selectedUser?.id === u.id ? "border-cyan-500/60 bg-cyan-500/10" : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[9px] font-black tracking-[0.4em] uppercase text-white/30">
+                    <span>ARC_{idx + 4001}</span>
+                    <span className={STATUS_THEMES[u.status]}>{u.status}</span>
+                  </div>
+                  <div className="mt-3 text-lg font-black uppercase">{u.name}</div>
+                  <div className="mt-1 text-[10px] font-black tracking-[0.3em] uppercase text-white/40">
+                    {u.role} · {u.title || "UNDEFINED"}
+                  </div>
+                </button>
+              ))}
+              {!filteredUsers.length && (
+                <div className="border border-dashed border-white/10 bg-white/5 px-6 py-10 text-center text-[10px] font-black tracking-[0.4em] uppercase text-white/30">
+                  NO MATCHING UNITS
+                </div>
+              )}
+            </div>
+          </aside>
+
+          <section className="space-y-6">
+            <div className="border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+              <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+                <div className="flex items-start gap-5">
+                  <div className="w-16 h-16 border border-white/10 bg-black/50 flex items-center justify-center text-cyan-300">
+                    <Crown size={22} />
+                  </div>
+                  <div>
+                    <div className="text-[9px] font-black tracking-[0.4em] uppercase text-white/40">
+                      PROFILE ID
+                    </div>
+                    <div className="mt-2 text-3xl font-black uppercase">
+                      {selectedUser?.name || "NO USER"}
+                    </div>
+                    <div className="mt-2 text-[10px] font-black tracking-[0.35em] uppercase text-white/50">
+                      {selectedUser?.role || "N/A"} · {selectedUser?.title || "UNASSIGNED"}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => selectedUser && setEditingUser({ ...selectedUser })}
+                    className="inline-flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-black tracking-[0.4em] uppercase text-white/70 hover:text-white hover:border-white/30 transition-all"
+                    type="button"
+                    disabled={!selectedUser}
+                  >
+                    <Edit3 size={14} />
+                    EDIT
+                  </button>
+                  <button
+                    onClick={() => selectedUser && setDeleteId(selectedUser.id)}
+                    className="inline-flex items-center gap-2 border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-black tracking-[0.4em] uppercase text-red-300 hover:text-red-200 hover:border-red-500/60 transition-all"
+                    type="button"
+                    disabled={!selectedUser}
+                  >
+                    <Trash2 size={14} />
+                    DELETE
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                <div className="border border-white/10 bg-black/40 p-4">
+                  <div className="text-[9px] font-black tracking-[0.4em] uppercase text-white/30">STATUS</div>
+                  <div className={`mt-2 text-lg font-black uppercase ${STATUS_THEMES[selectedUser?.status || "ACTIVE"]}`}>
+                    {selectedUser?.status || "UNKNOWN"}
+                  </div>
+                </div>
+                <div className="border border-white/10 bg-black/40 p-4">
+                  <div className="text-[9px] font-black tracking-[0.4em] uppercase text-white/30">JOINED</div>
+                  <div className="mt-2 text-lg font-black uppercase text-white/70">
+                    {selectedUser?.joined || "UNDEFINED"}
+                  </div>
+                </div>
+                <div className="border border-white/10 bg-black/40 p-4">
+                  <div className="text-[9px] font-black tracking-[0.4em] uppercase text-white/30">ROLE</div>
+                  <div className="mt-2 text-lg font-black uppercase text-white/70">
+                    {selectedUser?.role || "UNDEFINED"}
+                  </div>
+                </div>
+                <div className="border border-white/10 bg-black/40 p-4">
+                  <div className="text-[9px] font-black tracking-[0.4em] uppercase text-white/30">TITLE</div>
+                  <div className="mt-2 text-lg font-black uppercase text-white/70">
+                    {selectedUser?.title || "UNDEFINED"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {editingUser && (
+              <div className="border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3 text-xl font-black tracking-[0.2em] uppercase">
+                    <Shield size={18} />
+                    EDIT PROFILE
+                  </div>
+                  <button
+                    className="text-white/30 hover:text-white transition-colors"
+                    onClick={() => setEditingUser(null)}
+                    type="button"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <div className="grid gap-4">
+                  <input
+                    className="w-full bg-black/60 border border-white/10 p-4 text-xs font-black uppercase outline-none focus:border-cyan-500 transition-all placeholder:text-white/20"
+                    value={editingUser.name}
+                    onChange={(e) => setEditingUser((prev) => (prev ? { ...prev, name: e.target.value } : prev))}
+                  />
+                  <input
+                    className="w-full bg-black/60 border border-white/10 p-4 text-xs font-black uppercase outline-none focus:border-cyan-500 transition-all placeholder:text-white/20"
+                    value={editingUser.title}
+                    onChange={(e) => setEditingUser((prev) => (prev ? { ...prev, title: e.target.value } : prev))}
+                  />
+                  <select
+                    className="w-full bg-black/60 border border-white/10 p-4 text-xs font-black uppercase outline-none focus:border-cyan-500 transition-all"
+                    value={editingUser.role}
+                    onChange={(e) => setEditingUser((prev) => (prev ? { ...prev, role: e.target.value } : prev))}
+                  >
+                    {ROLES.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                  <select
+                    className="w-full bg-black/60 border border-white/10 p-4 text-xs font-black uppercase outline-none focus:border-cyan-500 transition-all"
+                    value={editingUser.status}
+                    onChange={(e) => setEditingUser((prev) => (prev ? { ...prev, status: e.target.value as Member["status"] } : prev))}
+                  >
+                    {Object.keys(STATUS_THEMES).map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                  <button
+                    className="w-full bg-gradient-to-r from-cyan-500 to-sky-400 py-4 text-[10px] font-black tracking-[0.4em] uppercase text-white transition-all duration-300"
+                    onClick={handleUpdate}
+                    type="button"
+                  >
+                    <Save size={14} />
+                    UPDATE
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-2xl" onClick={() => setShowForm(false)} />
+          <div className="relative w-full max-w-2xl border border-white/10 bg-[#0a0a15] p-8 shadow-[0_0_60px_rgba(7,3,20,0.8)]">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3 text-2xl font-black tracking-[0.2em] uppercase">
+                <Shield size={18} />
+                CREATE UNIT
+              </div>
+              <button className="text-white/30 hover:text-white transition-colors" onClick={() => setShowForm(false)} type="button">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="grid gap-4">
+              <input
+                className="w-full bg-black/60 border border-white/10 p-4 text-xs font-black uppercase outline-none focus:border-cyan-500 transition-all placeholder:text-white/20"
+                placeholder="NAME"
+                value={formData.name}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              />
+              <input
+                className="w-full bg-black/60 border border-white/10 p-4 text-xs font-black uppercase outline-none focus:border-cyan-500 transition-all placeholder:text-white/20"
+                placeholder="TITLE"
+                value={formData.title}
+                onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+              />
+              <select
+                className="w-full bg-black/60 border border-white/10 p-4 text-xs font-black uppercase outline-none focus:border-cyan-500 transition-all"
+                value={formData.role}
+                onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
+              >
+                {ROLES.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+              <select
+                className="w-full bg-black/60 border border-white/10 p-4 text-xs font-black uppercase outline-none focus:border-cyan-500 transition-all"
+                value={formData.status}
+                onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value as Member["status"] }))}
+              >
+                {Object.keys(STATUS_THEMES).map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <button
+                className="w-full bg-gradient-to-r from-cyan-500 to-sky-400 py-4 text-[10px] font-black tracking-[0.4em] uppercase text-white transition-all duration-300"
+                onClick={handleCreate}
+                type="button"
+              >
+                <Save size={14} />
+                SAVE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteId !== null && (
+        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-2xl" onClick={() => setDeleteId(null)} />
+          <div className="relative w-full max-w-2xl border border-white/10 bg-[#0a0a15] p-8 shadow-[0_0_60px_rgba(7,3,20,0.8)]">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3 text-2xl font-black tracking-[0.2em] uppercase">
+                <Trash2 size={18} />
+                DELETE UNIT
+              </div>
+              <button className="text-white/30 hover:text-white transition-colors" onClick={() => setDeleteId(null)} type="button">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="grid gap-4">
+              <p className="text-sm text-white/60">Confirm deletion?</p>
+              <button
+                className="w-full bg-red-600/90 hover:bg-red-500 text-white py-3 text-[10px] font-black tracking-[0.4em] uppercase transition-all duration-300"
+                onClick={handleDelete}
+                type="button"
+              >
+                DELETE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
