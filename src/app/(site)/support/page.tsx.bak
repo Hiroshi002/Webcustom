@@ -1,0 +1,327 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { Search, ArrowLeft, ShieldCheck, User as UserIcon, X, Activity, Radar, Timer } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { User } from "@/lib/userStore";
+import PremiumLoader from "@/components/loading/LoadingScreen";
+import styles from "@/styles/app/support/page.module.css";
+
+export default function SupportPage() {
+  const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isAppLoading, setIsAppLoading] = useState(true);
+
+  const fetchSupport = async () => {
+    const { data } = await supabase.from("members").select("*").eq("role", "SUPPORT").order("name", { ascending: true });
+    if (data) setUsers(data as User[]);
+  };
+
+  useEffect(() => {
+    fetchSupport();
+    const channel = supabase
+      .channel("support-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "members" },
+        (payload) => {
+          const nextRole = (payload.new as User | undefined)?.role;
+          const prevRole = (payload.old as User | undefined)?.role;
+          if (nextRole === "SUPPORT" || prevRole === "SUPPORT") {
+            fetchSupport();
+          }
+        }
+      )
+      .subscribe();
+    let interval: number | null = null;
+    const start = () => {
+      if (interval !== null) return;
+      interval = window.setInterval(() => {
+        if (document.visibilityState !== "visible") return;
+        fetchSupport();
+      }, 5000);
+    };
+    const stop = () => {
+      if (interval === null) return;
+      window.clearInterval(interval);
+      interval = null;
+    };
+    start();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchSupport();
+        start();
+      } else {
+        stop();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      supabase.removeChannel(channel);
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+
+  const filtered = useMemo(() => users.filter((u) => !query || u.name.toLowerCase().includes(query.toLowerCase())), [query, users]);
+  const stats = useMemo(() => {
+    const total = users.length;
+    const active = users.filter((u) => u.status === "ACTIVE").length;
+    const inactive = total - active;
+    const activeRate = total ? Math.round((active / total) * 100) : 0;
+    return { total, active, inactive, activeRate };
+  }, [users]);
+  const selectedIndex = useMemo(() => {
+    if (!selected) return -1;
+    return users.findIndex((u) => u.id === selected.id);
+  }, [selected, users]);
+
+  const spotlight = useMemo(() => filtered.slice(0, 2), [filtered]);
+  const roster = useMemo(() => filtered.slice(2), [filtered]);
+
+  if (isAppLoading) return <PremiumLoader onFinished={() => setIsAppLoading(false)} />;
+
+  return (
+    <main className={styles.page}>
+      <div className={styles.bg}>
+        <div className={styles.bgRadial} />
+        <div className={styles.bgGrid} />
+        <div className={styles.bgShoji} />
+        <div className={styles.bgHalo} />
+        <div className={styles.bgSweep} />
+        <div className={styles.bgScanline} />
+      </div>
+
+      <header className={styles.topBar}>
+        <div className={styles.navLeft}>
+          <Link href="/" className={styles.backLink}>
+            <div className={styles.backIcon}>
+              <ArrowLeft size={18} />
+            </div>
+            <span className={styles.backText}>RETURN_CORE</span>
+          </Link>
+        </div>
+        <div className={styles.navCenter}>SUPPORT STATION</div>
+        <div className={styles.navRight}>
+          <div className={styles.searchWrap}>
+            <Search className={styles.searchIcon} size={14} />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="TRACE_OPERATOR..."
+              className={styles.searchInput}
+            />
+            <div className={styles.searchGlow} />
+          </div>
+          <div className={styles.liveBadge}>
+            <span className={styles.liveDot} />
+            LIVE
+            <span className={styles.liveKanji}>稼働</span>
+          </div>
+        </div>
+      </header>
+
+      <div className={styles.container}>
+        <section className={styles.hero}>
+          <div className={styles.heroLeft}>
+            <div className={styles.heroKicker}>TACTICAL SUPPORT</div>
+            <h1 className={styles.heroTitle}>
+              <span>SUPPORT</span>
+              GRID
+            </h1>
+            <p className={styles.heroDesc}>
+              Live operational visibility, operator signals, and response readiness mapped in real time.
+            </p>
+            <div className={styles.heroMeta}>
+              <span className={styles.metaItem}>UPLINK_STABLE</span>
+              <span className={styles.metaItem}>SLA_READY</span>
+              <span className={styles.metaItem}>SECURE_CHANNEL</span>
+            </div>
+          </div>
+          <div className={styles.heroRight}>
+            <div className={styles.statDeck}>
+              <div className={styles.statCard}>
+                <span className={styles.statLabel}>ACTIVE RATE</span>
+                <span className={styles.statValue}>{stats.activeRate}%</span>
+                <span className={styles.statSub}>Signal integrity</span>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statLabel}>ACTIVE</span>
+                <span className={styles.statValue}>{stats.active}</span>
+                <span className={styles.statSub}>Operational units</span>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statLabel}>INACTIVE</span>
+                <span className={styles.statValue}>{stats.inactive}</span>
+                <span className={styles.statSub}>Standby units</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.matrix}>
+          <div className={styles.matrixHeader}>
+            <div>
+              <div className={styles.matrixTitle}>OPS MATRIX</div>
+              <div className={styles.matrixSub}>SYSTEM_STATUS</div>
+            </div>
+            <div className={styles.matrixTag}>MONITOR</div>
+          </div>
+          <div className={styles.matrixGrid}>
+            <div className={styles.matrixCard}>
+              <div className={styles.matrixIcon}>
+                <Activity size={16} />
+              </div>
+              <div>
+                <div className={styles.matrixLabel}>ACTIVE SIGNAL</div>
+                <div className={styles.matrixValue}>{stats.activeRate}%</div>
+              </div>
+            </div>
+            <div className={styles.matrixCard}>
+              <div className={styles.matrixIcon}>
+                <Radar size={16} />
+              </div>
+              <div>
+                <div className={styles.matrixLabel}>TOTAL UNITS</div>
+                <div className={styles.matrixValue}>{stats.total}</div>
+              </div>
+            </div>
+            <div className={styles.matrixCard}>
+              <div className={styles.matrixIcon}>
+                <Timer size={16} />
+              </div>
+              <div>
+                <div className={styles.matrixLabel}>QUEUE</div>
+                <div className={styles.matrixValue}>{stats.inactive}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.roster}>
+          <div className={styles.rosterHead}>
+            <div>
+              <div className={styles.rosterTitle}>SUPPORT CHANNELS</div>
+              <div className={styles.rosterSub}>OPERATIONAL FEED</div>
+            </div>
+            <div className={styles.rosterTag}>ACTIVE</div>
+          </div>
+          <div className={styles.rosterGrid}>
+            {spotlight.map((user, idx) => (
+              <button
+                key={`${user.id}-${idx}`}
+                className={`${styles.rosterCard} ${selected?.id === user.id ? styles.rosterCardActive : ""}`}
+                onClick={() => setSelected(user)}
+              >
+                <div className={styles.rosterGlow} />
+                <div className={styles.rosterHeader}>
+                  <div className={styles.rosterIcon}>
+                    <ShieldCheck size={18} />
+                  </div>
+                  <div className={styles.rosterMeta}>
+                    <span className={styles.rosterCode}>SUP_{idx + 11}</span>
+                    <span className={styles.rosterStatus}>
+                      <span className={`${styles.rosterStatusDot} ${user.status === "ACTIVE" ? styles.statusActive : styles.statusInactive}`} />
+                      {user.status}
+                    </span>
+                  </div>
+                </div>
+                <h3 className={styles.rosterName}>{user.name}</h3>
+                <span className={styles.rosterTitleText}>{user.title || "UNASSIGNED"}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.table}>
+          <div className={styles.tableHeader}>
+            <div>
+              <div className={styles.tableTitle}>OPERATOR MATRIX</div>
+              <div className={styles.tableSub}>LIVE GRID</div>
+            </div>
+            <div className={styles.tableTag}>TRACE</div>
+          </div>
+          <div className={styles.tableBody}>
+            <div className={styles.tableRowHeader}>
+              <span>#</span>
+              <span>Operator</span>
+              <span>Role</span>
+              <span>Status</span>
+              <span>Action</span>
+            </div>
+            {roster.map((user, idx) => (
+              <div key={user.id} className={styles.tableRow}>
+                <span className={styles.tableIndex}>{idx + 1}</span>
+                <div className={styles.tableIdentity}>
+                  <UserIcon size={14} />
+                  <div>
+                    <div className={styles.tableName}>{user.name}</div>
+                    <div className={styles.tableTitleText}>{user.title || "N/A"}</div>
+                  </div>
+                </div>
+                <span className={styles.tableRole}>{user.role}</span>
+                <span className={`${styles.tableStatus} ${user.status === "ACTIVE" ? styles.statusActiveText : styles.statusInactiveText}`}>
+                  {user.status}
+                </span>
+                <button
+                  className={styles.tableAction}
+                  onClick={() => setSelected(user)}
+                >
+                  Focus
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {selected && (
+          <section className={styles.detail}>
+            <div className={styles.detailHeader}>
+              <div>
+                <div className={styles.detailTitle}>OPERATOR FOCUS</div>
+                <div className={styles.detailSub}>SIGNAL CHANNEL</div>
+              </div>
+              <button
+                onClick={() => setSelected(null)}
+                className={styles.detailClose}
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div className={styles.detailBody}>
+              <div className={styles.detailCard}>
+                <div className={styles.detailIcon}>
+                  <ShieldCheck size={16} />
+                </div>
+                <div className={styles.detailMeta}>
+                  <span className={styles.detailLabel}>OPERATOR</span>
+                  <span className={styles.detailValue}>{selected.name}</span>
+                </div>
+              </div>
+              <div className={styles.detailCard}>
+                <div className={styles.detailIcon}>
+                  <UserIcon size={16} />
+                </div>
+                <div className={styles.detailMeta}>
+                  <span className={styles.detailLabel}>TITLE</span>
+                  <span className={styles.detailValue}>{selected.title || "UNASSIGNED"}</span>
+                </div>
+              </div>
+              <div className={styles.detailCard}>
+                <div className={styles.detailIcon}>
+                  <Activity size={16} />
+                </div>
+                <div className={styles.detailMeta}>
+                  <span className={styles.detailLabel}>STATUS</span>
+                  <span className={styles.detailValue}>{selected.status}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
+    </main>
+  );
+}

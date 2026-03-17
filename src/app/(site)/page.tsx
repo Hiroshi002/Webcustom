@@ -1,0 +1,271 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import LoadingScreen from "@/components/loading/LoadingScreenHome";
+import styles from "@/styles/app/page.module.css";
+
+
+const menus = [
+  { title: "CHECK", sub: "データ解析", href: "/check", no: "01" },
+  { title: "ADMIN", sub: "権限管理", href: "/admin", no: "02" },
+];
+
+export default function Home() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+  const [latency, setLatency] = useState(0);
+  const [serverLatency, setServerLatency] = useState(0);
+  const [networkLatency, setNetworkLatency] = useState(0);
+  const [uptime, setUptime] = useState("99.7%");
+  const [integrity, setIntegrity] = useState("Secured");
+  const latencySamples = useRef<number[]>([]);
+  const serverSamples = useRef<number[]>([]);
+  const networkSamples = useRef<number[]>([]);
+  const latencyInFlight = useRef(false);
+
+  useEffect(() => {
+    const checkSize = () => setIsMobile(window.innerWidth < 768);
+    checkSize();
+    window.addEventListener("resize", checkSize);
+    const move = (e: MouseEvent) => { if (window.innerWidth >= 768) setPos({ x: e.clientX, y: e.clientY }); };
+    window.addEventListener("mousemove", move);
+    return () => {
+      window.removeEventListener("resize", checkSize);
+      window.removeEventListener("mousemove", move);
+    };
+  }, []);
+
+  useEffect(() => {
+    const parseServerTiming = (value: string | null) => {
+      if (!value) return null;
+      const match = value.match(/dur=([\d.]+)/);
+      if (!match) return null;
+      const parsed = Number(match[1]);
+      return Number.isFinite(parsed) ? parsed : null;
+    };
+
+    const pushAverage = (store: React.MutableRefObject<number[]>, value: number) => {
+      const list = store.current;
+      list.push(value);
+      if (list.length > 5) list.shift();
+      return Math.round(list.reduce((sum, v) => sum + v, 0) / list.length);
+    };
+
+    const checkLatency = async () => {
+      if (document.visibilityState !== "visible") return;
+      if (latencyInFlight.current) return;
+      latencyInFlight.current = true;
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 1500);
+      const start = performance.now();
+      try {
+        const response = await fetch(`/api/ping?t=${Date.now()}`, { method: "HEAD", cache: "no-store", signal: controller.signal });
+        const totalLatency = Math.round(performance.now() - start);
+        const serverTiming = parseServerTiming(response.headers.get("server-timing"));
+        const serverValue = serverTiming !== null ? Math.round(serverTiming) : 0;
+        const networkValue = Math.max(0, totalLatency - serverValue);
+        const averageTotal = pushAverage(latencySamples, totalLatency);
+        const averageServer = serverTiming !== null ? pushAverage(serverSamples, serverValue) : 0;
+        const averageNetwork = serverTiming !== null ? pushAverage(networkSamples, networkValue) : 0;
+        setLatency(averageTotal);
+        setServerLatency(averageServer);
+        setNetworkLatency(averageNetwork);
+        setIntegrity(averageTotal > 180 ? "Degraded" : "Secured");
+      } catch {
+        latencySamples.current = [];
+        serverSamples.current = [];
+        networkSamples.current = [];
+        setLatency(0);
+        setServerLatency(0);
+        setNetworkLatency(0);
+        setIntegrity("Offline");
+      } finally {
+        window.clearTimeout(timeout);
+        latencyInFlight.current = false;
+      }
+    };
+
+    const updateUptime = () => {
+      const now = Date.now();
+      const variation = Math.abs(Math.sin(now / 60000)) * 0.4;
+      setUptime(`${(99.5 + variation).toFixed(2)}%`);
+    };
+
+    let interval: number | null = null;
+    const start = () => {
+      if (interval !== null) return;
+      interval = window.setInterval(() => {
+        checkLatency();
+        updateUptime();
+      }, 3000);
+    };
+    const stop = () => {
+      if (interval === null) return;
+      window.clearInterval(interval);
+      interval = null;
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        checkLatency();
+        updateUptime();
+        start();
+      } else {
+        stop();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    checkLatency();
+    updateUptime();
+    start();
+
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
+
+  if (isLoading) {
+    return <LoadingScreen onFinished={() => setIsLoading(false)} systemName="CORE_INITIALIZATION" />;
+  }
+
+  const spotStyle = {
+    "--spot-x": `${pos.x}px`,
+    "--spot-y": `${pos.y}px`,
+  } as CSSProperties;
+
+  return (
+    <main className={styles.mainContainer}>
+      <div className={styles.backgroundLayer}>
+        {!isMobile && (
+          <div
+            className={styles.radialSpot}
+            style={spotStyle}
+          />
+        )}
+        <div className={styles.gridPattern} />
+        <div className={styles.shojiPattern} />
+        <div className={styles.horizonGlow} />
+        <div className={styles.sakuraHalo} />
+        <div className={styles.orbitSweep} />
+        <div className={styles.particleField} />
+        <div className={styles.scanline} />
+      </div>
+
+      <div className={styles.contentContainer}>
+        <div className={styles.topBar}>
+          <div className={styles.brand}>
+            <span className={styles.brandMark} />
+            <span className={styles.brandText}>CONSTANCY // CORE</span>
+          </div>
+          <div className={styles.topRight}>
+            <span className={styles.statusChip}>AUTHORIZED</span>
+            <span className={styles.statusText}>NODE: TOKYO-7</span>
+          </div>
+        </div>
+
+        <section className={styles.hero}>
+          <div className={styles.heroLeft}>
+            <div className={styles.kicker}>Operational Command Hub</div>
+            <h1 className={styles.heroTitle}>CONSTANCY</h1>
+            <p className={styles.heroSubtitle}>
+              Unified command layer for access, monitoring, and response orchestration.
+            </p>
+            <div className={styles.heroMeta}>
+              <span className={styles.metaPill}>SIGNAL: STABLE</span>
+              <span className={styles.metaPill}>PROTOCOL v6.2</span>
+              <span className={styles.metaPill}>SYNC 2026</span>
+            </div>
+          </div>
+          <div className={styles.heroRight}>
+            <div className={styles.statusCard}>
+              <div className={styles.statusHeader}>
+                <span className={styles.statusTitle}>System Matrix</span>
+                <span className={styles.statusTag}>LIVE</span>
+              </div>
+              <div className={styles.statusGrid}>
+                <div className={styles.statusItem}>
+                  <span className={styles.statusLabel}>Zone</span>
+                  <span className={styles.statusValue}>Shinjuku</span>
+                </div>
+                <div className={styles.statusItem}>
+                  <span className={styles.statusLabel}>Uptime</span>
+                  <span className={styles.statusValue}>{uptime}</span>
+                </div>
+                <div className={styles.statusItem}>
+                  <span className={styles.statusLabel}>Integrity</span>
+                  <span className={styles.statusValue}>{integrity}</span>
+                </div>
+                <div className={styles.statusItem}>
+                  <span className={styles.statusLabel}>Latency</span>
+                  <span className={styles.statusValue}>{latency}ms</span>
+                </div>
+                <div className={styles.statusItem}>
+                  <span className={styles.statusLabel}>Server</span>
+                  <span className={styles.statusValue}>{serverLatency}ms</span>
+                </div>
+                <div className={styles.statusItem}>
+                  <span className={styles.statusLabel}>Network</span>
+                  <span className={styles.statusValue}>{networkLatency}ms</span>
+                </div>
+              </div>
+            </div>
+            <div className={styles.signalBar}>
+              <div className={styles.signalLine} />
+              <div className={styles.signalLine} />
+              <div className={styles.signalLine} />
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.moduleSection}>
+          <div className={styles.moduleHeader}>
+            <div className={styles.moduleHeading}>Core Modules</div>
+            <div className={styles.moduleSubheading}>
+              Primary gateways for operations and oversight
+            </div>
+          </div>
+          <div className={styles.menuGrid}>
+            {menus.map((m, i) => (
+              <Link key={i} href={m.href} className={`${styles.menuLink} group`}>
+                <div className={styles.menuCard}>
+                  <div className={styles.cardGlow} />
+                  <div className={styles.cardStamp}>
+                    <span>ユニット</span>
+                  </div>
+                  <div className={styles.menuTopLine} />
+                  <div className={styles.menuContent}>
+                    <div className={styles.menuTopRow}>
+                      <span className={styles.menuNo}>{m.no}</span>
+                      <span className={styles.menuSub}>{m.sub}</span>
+                    </div>
+                    <h3 className={styles.menuTitle}>{m.title}</h3>
+                    <div className={styles.menuAction}>
+                      <span>INITIALIZE</span>
+                      <span className={styles.menuArrow}>→</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <footer className={styles.footer}>
+          <div className={styles.footerAccent} />
+          <div className={styles.footerCore}>
+            <div className={styles.footerSeal}>
+              <span className={styles.footerSealKanji}>結界</span>
+              <span className={styles.footerSealKana}>プロトコル</span>
+            </div>
+            <div className={styles.footerText}>Protocol Cycle 2026 // Operational</div>
+            <div className={styles.footerSubText}>第七監視局 — CONSTANCY HUB</div>
+          </div>
+        </footer>
+      </div>
+    </main>
+  );
+}
